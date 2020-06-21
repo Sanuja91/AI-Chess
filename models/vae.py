@@ -226,8 +226,6 @@ def train_vae(vae, data, epochs, log_interval):
                 sample_input = inputs[0].squeeze(0).detach().cpu()
                 sample_output = outputs[0].squeeze(0).detach().cpu()
                 
-                print('INPUT', sample_input.shape)
-                print('OUTPUT', sample_output.shape)
                 sample_input = transforms.ToPILImage(mode = 'RGB')(sample_input)
                 sample_input.save(f'{path}/E - {epoch} B - {batch_idx} target.png',"PNG")
                 sample_output = transforms.ToPILImage(mode = 'RGB')(sample_output)
