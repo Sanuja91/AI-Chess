@@ -7,7 +7,6 @@ from torch.distributions.distribution import Distribution
 from torch.nn.utils import clip_grad_norm_
 import matplotlib.pyplot as plt
 from models.base import Neural_Network
-from utilities import create_path
 
 class MDN_RNN(Neural_Network):
     """A Mixed Density Network using an LSTM Core"""
@@ -33,16 +32,15 @@ class MDN_RNN(Neural_Network):
         self.hidden_size = self.params['hidden_size']
         self.gaussian_size = self.params['gaussian_size']
         self.stacked_layers = self.params['stacked_layers']
-        self.seq_len = self.params['seq_len']
         self.learning_rate = self.params['learning_rate']
         self.grad_clip = self.params['grad_clip']
         self.batch_size = self.params['batch_size']
         self.device = self.get_device()
         
         self.lstm = nn.LSTM(self.z_size + self.action_size, self.hidden_size, self.stacked_layers, batch_first = True)
-        self.fc1 = nn.Linear(self.hidden_size, self.gaussian_size * (self.z_size + self.action_size))
-        self.fc2 = nn.Linear(self.hidden_size, self.gaussian_size * (self.z_size + self.action_size))
-        self.fc3 = nn.Linear(self.hidden_size, self.gaussian_size * (self.z_size + self.action_size))
+        self.fc1 = nn.Linear(self.hidden_size, self.gaussian_size * self.z_size)
+        self.fc2 = nn.Linear(self.hidden_size, self.gaussian_size * self.z_size)
+        self.fc3 = nn.Linear(self.hidden_size, self.gaussian_size * self.z_size)
         
         if load_model != False:
             self.load_state_dict(self.weights)
@@ -53,17 +51,26 @@ class MDN_RNN(Neural_Network):
         rollout_length = y.size(1)
         pi, mu, sigma = self.fc1(y), self.fc2(y), self.fc3(y)
         
-        pi = pi.view(-1, rollout_length, self.gaussian_size, self.z_size + self.action_size)
-        mu = mu.view(-1, rollout_length, self.gaussian_size, self.z_size + self.action_size)
-        sigma = sigma.view(-1, rollout_length, self.gaussian_size, self.z_size + self.action_size)
+        pi = pi.view(-1, rollout_length, self.gaussian_size, self.z_size)
+        mu = mu.view(-1, rollout_length, self.gaussian_size, self.z_size)
+        sigma = sigma.view(-1, rollout_length, self.gaussian_size, self.z_size)
         
         pi = F.softmax(pi, 2)
         sigma = torch.exp(sigma)
         return pi, mu, sigma
         
         
-    def forward(self, x, h):
+    def forward(self, x, h, x_lengths = None):
+        if x_lengths is not None:
+            # pack_padded_sequence so that padded items in the sequence won't be shown to the LSTM
+            x = torch.nn.utils.rnn.pack_padded_sequence(x, x_lengths, batch_first = True, enforce_sorted = True)
+        
         y, (h, c) = self.lstm(x, h)
+        
+        if x_lengths is not None:
+            # undo the packing operation
+            y, _ = torch.nn.utils.rnn.pad_packed_sequence(y, batch_first = True)
+
         pi, mu, sigma = self.get_mixture_coef(y)
         return (pi, mu, sigma), (h, c)
     
@@ -88,8 +95,8 @@ def train_mdn(mdn, epochs, log_interval):
     mdn.train()
     mdn = mdn.to(mdn.device)
     optimizer = optim.Adam(mdn.parameters(), lr = mdn.learning_rate)
-    z = torch.load(create_path('data\\inputs\\tensors\\zs.pt')).float()
-    actions = torch.load(create_path('data\\inputs\\tensors\\actions.pt')).float()
+    z = torch.load('data/inputs/tensors/zs.pt').float()
+    actions = torch.load('data/inputs/tensors/actions.pt').float()
     z = torch.cat((z, actions), dim = 1).unsqueeze(0)    
     
     # Creates batches
@@ -124,64 +131,3 @@ def train_mdn(mdn, epochs, log_interval):
         optimizer.step()
         print('Epoch [{}/{}], Loss: {:.4f}'.format(epoch, epochs, loss.item()))
     mdn.save_model()
-
-
-legal_actions = ['g1h3','g1f3','b1c3','b1a3','h2h3','g2g3','f2f3','e2e3','d2d3','c2c3','b2b3','a2a3','h2h4','g2g4','f2f4','e2e4','d2d4','c2c4','b2b4','a2a4']
-'#  'Q NE1'
-#  'Q NE2',
-#  'Q NE3',
-#  'Q NE4',
-#  'Q NE5',
-#  'Q NE6',
-#  'Q NE7',
-#  'Q E1',
-#  'Q E2',
-#  'Q E3',
-#  'Q E4',
-#  'Q E5',
-#  'Q E6',
-#  'Q E7',
-#  'Q SE1',
-#  'Q SE2',
-#  'Q SE3',
-#  'Q SE4',
-#  'Q SE5',
-#  'Q SE6',
-#  'Q SE7',
-#  'Q S1',
-#  'Q S2',
-#  'Q S3',
-#  'Q S4',
-#  'Q S5',
-#  'Q S6',
-#  'Q S7',
-#  'Q SW1',
-#  'Q SW2',
-#  'Q SW3',
-#  'Q SW4',
-#  'Q SW5',
-#  'Q SW6',
-#  'Q SW7',
-#  'Q W1',
-#  'Q W2',
-#  'Q W3',
-#  'Q W4',
-#  'Q W5',
-#  'Q W6',
-#  'Q W7',
-#  'Q NW1',
-#  'Q NW2',
-#  'Q NW3',
-#  'Q NW4',
-#  'Q NW5',
-#  'Q NW6',
-#  'Q NW7',
-#  'K N',
-#  'K NE',
-#  'K E',
-#  'K SE',
-#  'K S',
-#  'K SW',
-#  'K W',
-#  'K NW'
-# }
