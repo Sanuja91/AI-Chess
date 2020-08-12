@@ -60,5 +60,4 @@ class Controller(Neural_Network):
         xv = self.fc_v2(xv)
 #         print("XV FC2", xv.shape)
         xv = self.fc_v3(xv)
-#         print("XV FC3", xv.shape)
         return xp, xv
