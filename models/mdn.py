@@ -72,7 +72,7 @@ class MDN_RNN(Neural_Network):
             y, _ = torch.nn.utils.rnn.pad_packed_sequence(y, batch_first = True)
 
         pi, mu, sigma = self.get_mixture_coef(y)
-        rsoureturn (pi, mu, sigma), (h, c)
+        return (pi, mu, sigma), (h, c)
     
     def init_hidden(self, batch_size):
         return (

@@ -31,7 +31,7 @@ class Neural_Network(nn.Module):
 
     def load_model(self, file_name):
         """Loads the models parameters and weights"""
-        path = f'checkpoints/{self.type}/{self.name}/'
+        path = f'checkpoints_/{self.type}/{self.name}/'
         print(path)
 
         if file_name == 'Latest':
@@ -39,7 +39,7 @@ class Neural_Network(nn.Module):
             latest_file = max(list_of_files, key = os.path.getctime)
             _, file_name = os.path.split(latest_file)
 
-        path = f'checkpoints/{self.type}/{self.name}/{file_name}'
+        path = f'checkpoints_/{self.type}/{self.name}/{file_name}'
         
         checkpoint = torch.load(path, map_location = lambda storage, loc: storage)
         self.params = checkpoint['params']
@@ -53,7 +53,7 @@ class Neural_Network(nn.Module):
             'weights' : self.state_dict()
         }
         
-        path = f'checkpoints/{self.type}/{self.name}'
+        path = f'checkpoints_/{self.type}/{self.name}'
         if not os.path.exists(path):
             os.makedirs(path)
         
