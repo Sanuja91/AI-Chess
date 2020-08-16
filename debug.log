@@ -30,3 +30,4 @@
 [0706/075432.495:ERROR:process_reader_win.cc(151)] SuspendThread: Access is denied. (0x5)
 [0706/075432.495:ERROR:process_reader_win.cc(151)] SuspendThread: Access is denied. (0x5)
 [0706/075432.689:ERROR:process_reader_win.cc(151)] SuspendThread: Access is denied. (0x5)
+[0816/110339.120:ERROR:filesystem_win.cc(148)] DeleteFile C:\Users\SanujaPC\AppData\Local\Google\Chrome\User Data\Crashpad\reports\9f2c46c3-4ef3-4348-9fc2-8ac4885ffcd3.dmp: The process cannot access the file because it is being used by another process. (0x20)

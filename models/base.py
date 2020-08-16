@@ -1,4 +1,4 @@
-import torch, os
+import torch, os, random
 import torch.nn as nn
 from abc import ABCMeta, abstractmethod
 from time import time
@@ -32,30 +32,41 @@ class Neural_Network(nn.Module):
     def load_model(self, file_name):
         """Loads the models parameters and weights"""
         path = f'checkpoints_/{self.type}/{self.name}/'
-        print(path)
+        
 
         if file_name == 'Latest':
-            list_of_files = [path + x for x in os.listdir(path)]
-            latest_file = max(list_of_files, key = os.path.getctime)
+            list_of_file_paths = [path + x for x in os.listdir(path)]
+            latest_file = max(list_of_file_paths, key = os.path.getctime)
             _, file_name = os.path.split(latest_file)
+
+        elif file_name == 'Random':
+            list_of_files = [x for x in os.listdir(path) if '.pth' in x]
+            file_name = random.choice(list_of_files)
+            print(f'Loading Random file {file_name}')
 
         path = f'checkpoints_/{self.type}/{self.name}/{file_name}'
         
         checkpoint = torch.load(path, map_location = lambda storage, loc: storage)
         self.params = checkpoint['params']
         self.weights = checkpoint['weights']
+        try:
+            self.train_steps = checkpoint['train_steps']
+        except Exception:
+            self.train_steps = 0
 
-    def save_model(self):
+
+    def save_model(self, epoch = 0):
         """Saves the models parameters and weights"""
         
         checkpoint = {
             'params' : self.params,
-            'weights' : self.state_dict()
+            'weights' : self.state_dict(),
+            'train_steps' : self.train_steps
         }
         
         path = f'checkpoints_/{self.type}/{self.name}'
         if not os.path.exists(path):
             os.makedirs(path)
         
-        path += f'/{str(time())}.pth'
+        path += f'/E{epoch}_{str(time())}.pth'
         torch.save(checkpoint, path)
