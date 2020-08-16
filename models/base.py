@@ -49,19 +49,13 @@ class Neural_Network(nn.Module):
         checkpoint = torch.load(path, map_location = lambda storage, loc: storage)
         self.params = checkpoint['params']
         self.weights = checkpoint['weights']
-        try:
-            self.train_steps = checkpoint['train_steps']
-        except Exception:
-            self.train_steps = 0
-
 
     def save_model(self, epoch = 0):
         """Saves the models parameters and weights"""
         
         checkpoint = {
             'params' : self.params,
-            'weights' : self.state_dict(),
-            'train_steps' : self.train_steps
+            'weights' : self.state_dict()
         }
         
         path = f'checkpoints_/{self.type}/{self.name}'
