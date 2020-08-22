@@ -62,5 +62,5 @@ class Neural_Network(nn.Module):
         if not os.path.exists(path):
             os.makedirs(path)
         
-        path += f'/E{epoch}_{str(time())}.pth'
+        path += f'/E{epoch}.pth'
         torch.save(checkpoint, path)
