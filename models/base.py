@@ -17,6 +17,8 @@ class Neural_Network(nn.Module):
         * **type_** (string) --- type of the model
         * **params** (dict-like) --- a dictionary of parameters
         """
+        self.epoch = 0
+        self.train_steps = 0
         super(Neural_Network, self).__init__()
     
     def get_device(self):
@@ -49,13 +51,19 @@ class Neural_Network(nn.Module):
         checkpoint = torch.load(path, map_location = lambda storage, loc: storage)
         self.params = checkpoint['params']
         self.weights = checkpoint['weights']
+        if 'epoch' in checkpoint:
+            self.epoch = checkpoint['epoch']
+        if 'train_steps' in checkpoint:
+            self.train_steps = checkpoint['train_steps']
 
-    def save_model(self, epoch = 0):
+    def save_model(self, epoch = 0, steps = 0):
         """Saves the models parameters and weights"""
         
         checkpoint = {
             'params' : self.params,
-            'weights' : self.state_dict()
+            'weights' : self.state_dict(),
+            'epoch' : self.epoch,
+            'train_steps' : self.train_steps
         }
         
         path = f'checkpoints_/{self.type}/{self.name}'
