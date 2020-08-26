@@ -29,7 +29,8 @@ class Neural_Network(nn.Module):
         if str(device) == 'cuda':
             torch.backends.cudnn.benchmark = True
             torch.backends.cudnn.enabled = True
-        return device
+        print('WARNING OVERRIDDING GPU TO RUN ON CPU')
+        return 'cpu'
 
     def load_model(self, file_name):
         """Loads the models parameters and weights"""
