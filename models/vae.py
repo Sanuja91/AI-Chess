@@ -11,7 +11,7 @@ from models.base import Neural_Network
 class Conv(nn.Module):
     """Simlifed NN for ease of code"""
 
-    def __init__(self, in_channels, out_channels, kernel_size, stride, padding, conv = nn.Conv1d, activation = nn.ReLU, batch_norm = False):
+    def __init__(self, in_channels, out_channels, kernel_size, stride, padding, conv = nn.Conv1d, activation = None, batch_norm = False):
         """Initialize an Convolutional model given a dictionary of parameter.s
 
         Params
@@ -54,14 +54,18 @@ class Conv(nn.Module):
         else:
             self.bn = None
 
-        self.activation = activation()
+        if activation:
+            self.activation = activation()
+        else: 
+            self.activation = activation
 
     def forward(self, x):
         # print(x.shape)
         x = self.conv(x)
         if self.bn:
             x = self.bn(x)
-        x = self.activation(x)
+        if self.activation:
+            x = self.activation(x)
         return x
 
 

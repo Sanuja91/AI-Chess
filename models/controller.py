@@ -31,9 +31,11 @@ class Policy_Controller(Neural_Network):
         self.device = self.get_device()
         
         self.fc1 = nn.Sequential(nn.Linear(self.z_size + self.hidden_size, self.params['expansion_size']), nn.ReLU())
-        
+        self.fc2 = nn.Sequential(nn.Linear(self.params['expansion_size'], 512), nn.ReLU())
+        self.fc3 = nn.Sequential(nn.Linear(512, 256), nn.ReLU())
+
         self.decoder = nn.Sequential(
-            Conv(self.params['expansion_size'], 256, 3, 1, 0, conv = nn.ConvTranspose2d, activation = nn.ReLU, batch_norm = True),
+            Conv(256, 256, 3, 1, 0, conv = nn.ConvTranspose2d, activation = nn.ReLU, batch_norm = True),
             Conv(256, 128, 3, 1, 0, conv = nn.ConvTranspose2d, activation = nn.ReLU, batch_norm = True),
             Conv(128, 64, 3, 1, 0, conv = nn.ConvTranspose2d, activation = nn.ReLU, batch_norm = True),
             Conv(64, self.action_size[0], 2, 1, 0, conv = nn.ConvTranspose2d, activation = nn.ReLU, batch_norm = True),
@@ -48,6 +50,8 @@ class Policy_Controller(Neural_Network):
     def forward(self, x):
         # print("ACTOR INPUT", x.shape)
         xp = self.fc1(x)
+        xp = self.fc2(xp)
+        xp = self.fc3(xp)
         # print("ACTOR FC1", xp.shape)
         xp = xp.reshape(xp.shape[0], -1, 1, 1)
         # print("ACTOR RESHAPE", xp.shape)
@@ -82,7 +86,7 @@ class Value_Controller(Neural_Network):
         
         self.fc1 = nn.Sequential(nn.Linear(self.z_size + self.hidden_size, 100), nn.ReLU())
         self.fc2 = nn.Sequential(nn.Linear(100, 20), nn.ReLU())
-        self.fc3 = nn.Linear(20, 1)
+        self.fc3 = nn.Sequential(nn.Linear(20, 1))
         
         if load_model != False:
             self.load_state_dict(self.weights)
