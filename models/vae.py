@@ -60,7 +60,6 @@ class Conv(nn.Module):
             self.activation = activation
 
     def forward(self, x):
-        # print(x.shape)
         x = self.conv(x)
         if self.bn:
             x = self.bn(x)
